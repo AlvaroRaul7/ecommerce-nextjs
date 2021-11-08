@@ -29,7 +29,13 @@ const useStyles = makeStyles({
 
     footer: {
         textAlign: 'center',
-    }
+        marginTop:10
+    },
+
+    section:{
+        marginTop:'10px',
+        marginBotton:'10px'
+    },
 
 });
 

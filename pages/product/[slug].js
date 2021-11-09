@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import {useRouter} from 'next/router';
 import data from '../../utils/data';
 import Layout from '../../components/Layout';
@@ -6,19 +6,36 @@ import NextLink from 'next/link';
 import {Link, Grid, List, ListItem, Typography, Card, Button} from '@material-ui/core'
 import useStyles from '../../utils/styles';
 import Image from 'next/image'
+import getProducts from '../../lib/getProducts';
+import axios from 'axios';
 
-
-export default function ProductScreen() {
+import Cookies from 'js-cookie';
+const  ProductScreen = (props) => {
+    
+    const {products} = props
     const classes = useStyles();
     const router = useRouter();
     const {slug} = router.query;
-    const product = data.products.find(a=> a.slug === slug);
+    console.log(products);
+
+    console.log(router.query)
+    const product = products.find(a=> a.handle === slug);
     if (!product){
         return <div> Product not found</div>
     }
+    const addToCartHandler = async () => {
+        console.log("anadido al carrito")
+       
+        if (product.variants[0].quantityAvailable <= 0) {
+            window.alert('Sorry: Product is out of stock')
+            return;
+        }
+       
+        router.push('/cart');
 
+        }
     return (
-        <Layout title = {product.name} description={product.description}>
+        <Layout title = {product.title} description={product.handle}>
             <div className={classes.section}>
                 <NextLink href="/" passHref>
                     <Link> 
@@ -29,8 +46,8 @@ export default function ProductScreen() {
             <Grid container spacing={1}>
                 <Grid item md={6} xs={12}>
                     <Image 
-                    src={product.image} 
-                    alt={product.name} 
+                    src={product.images[0].originalSrc} 
+                    alt={product.title} 
                     width={640} 
                     height={640}>
 
@@ -39,22 +56,23 @@ export default function ProductScreen() {
                 <Grid item md={3} xs={12}>
                     <List>
                         <ListItem> 
-                            <Typography component="h1"> {product.name} </Typography>
+                            <Typography component="h1" variant="h1"> {product.name} </Typography>
                         </ListItem>
                         <ListItem> 
-                            <Typography>  Category: {product.category}  </Typography>
+                            <Typography>  Category: {product.tags[0]}  </Typography>
                         </ListItem>
                         <ListItem> 
-                           <Typography>Brand: {product.brand} </Typography> 
+                           <Typography> Shipping: {product.variants[0].requiresShipping ? 'Yes' : 'No'} </Typography>
+                           
                         </ListItem>
-                        <ListItem> 
+                        {/* <ListItem> 
                            <Typography> Rating: {product.rating} stars ({product.numReviews} reviews) </Typography>
-                        </ListItem>
-                        <ListItem>
+                        </ListItem> */}
+                        {/* <ListItem>
                             <Typography>
-                                {product.description}
+                                Requires shipping {product.variants[0].quantityAvailable ? ': Yes' : ': No'}
                             </Typography>
-                        </ListItem>
+                        </ListItem> */}
                     </List>
 
                 </Grid>
@@ -67,7 +85,7 @@ export default function ProductScreen() {
                                     <Typography>Price</Typography>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <Typography>{product.price}</Typography>
+                                        <Typography>{product.variants[0].price}</Typography>
                                     </Grid>
                                 </Grid>
                             </ListItem>
@@ -77,12 +95,12 @@ export default function ProductScreen() {
                                     <Typography>Status</Typography>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <Typography>{product.countInStock>0?'In stock':'Unavailable'}</Typography>
+                                        <Typography>{product.variants[0].quantityAvailable>0?'In stock':'Unavailable'}</Typography>
                                     </Grid>
                                 </Grid>
                             </ListItem>
                             <ListItem>
-                                <Button fullWidth variant="contained" color="primary">
+                                <Button fullWidth variant="contained" color="primary"  onClick={addToCartHandler}>
                                     Add to cart
                                 </Button>
                             </ListItem>
@@ -95,3 +113,15 @@ export default function ProductScreen() {
         </Layout>
     )
 }
+
+export default ProductScreen;
+
+export async function getServerSideProps(context) {
+
+    let products = await getProducts();
+   return {
+     props: {
+       products
+     }
+   }
+ }

@@ -1,5 +1,7 @@
 import '../styles/globals.css';
-import  {useEffect} from 'react';
+import  {useEffect, createContext} from 'react';
+import Cookies from 'js-cookie';
+
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -10,7 +12,13 @@ function MyApp({ Component, pageProps }) {
     }
   }, [])
  
-  return <Component {...pageProps} />
+  return( 
+    
+    <Component {...pageProps} />
+    
+  );
+
 }
 
 export default MyApp
+

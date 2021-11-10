@@ -26,6 +26,7 @@ import { useRouter } from 'next/router';
 
 function CartScreen() {
   const cartItems =[];
+  
   const updateCartHandler = async (item, quantity) => {
    
     if (true) {
